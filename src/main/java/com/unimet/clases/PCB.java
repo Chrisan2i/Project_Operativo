@@ -1,0 +1,62 @@
+package com.unimet.clases;
+
+public class PCB {
+    private static int contadorIds = 1; // Para autogenerar IDs únicos (1, 2, 3...)
+    
+    // Atributos requeridos por el PDF
+    private int id;
+    private String nombre;
+    private String estado; // "Nuevo", "Listo", "Ejecucion", "Bloqueado", "Terminado"
+    private int programCounter; // PC
+    private int mar; // MAR
+    private int prioridad; // Prioridad del proceso
+    private int instruccionesTotales; // Duración total
+    private int instruccionesEjecutadas; // Progreso
+    private int deadline; // Tiempo límite (ciclo reloj absoluto)
+    
+    // Constructor
+    public PCB(String nombre, int prioridad, int instrucciones, int deadline) {
+        this.id = contadorIds++;
+        this.nombre = nombre;
+        this.prioridad = prioridad;
+        this.instruccionesTotales = instrucciones;
+        this.deadline = deadline; // Ciclo reloj en el que DEBE terminar
+        
+        // Valores iniciales por defecto
+        this.estado = "Nuevo";
+        this.programCounter = 0;
+        this.mar = 0;
+        this.instruccionesEjecutadas = 0;
+    }
+    
+    // --- Getters y Setters ---
+
+    public int getId() { return id; }
+    
+    public String getNombre() { return nombre; }
+    
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    
+    public int getPrioridad() { return prioridad; }
+    
+    public int getInstruccionesTotales() { return instruccionesTotales; }
+    
+    public int getInstruccionesEjecutadas() { return instruccionesEjecutadas; }
+
+    public int getProgramCounter() { return programCounter; }
+    
+    public int getDeadline() { return deadline; }
+
+    // Método para simular ejecución de un ciclo
+    public void avanzarInstruccion() {
+        this.programCounter++;
+        this.mar++;
+        this.instruccionesEjecutadas++;
+    }
+    
+    @Override
+    public String toString() {
+        return nombre + " (ID:" + id + ") - " + estado;
+    }
+}
