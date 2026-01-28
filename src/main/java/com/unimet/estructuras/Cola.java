@@ -53,4 +53,15 @@ public class Cola<T> {
     public int getSize() {
         return size;
     }
+    // Método para imprimir todo el contenido de la cola
+    @Override
+    public String toString() {
+        String resultado = "";
+        Nodo<T> aux = pFirst;
+        while (aux != null) {
+            resultado += aux.getContenido().toString() + "\n";
+            aux = aux.getSiguiente();
+        }
+        return resultado;
+    }
 }

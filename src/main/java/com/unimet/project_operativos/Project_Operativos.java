@@ -1,16 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.unimet.project_operativos;
 
-/**
- *
- * @author chris
- */
+import com.unimet.interfaz.Simulacion;
+
 public class Project_Operativos {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        // Esto inicia tu ventana
+        Simulacion ventana = new Simulacion();
+        ventana.setVisible(true);
+        ventana.setLocationRelativeTo(null); // Para que salga en el centro
     }
 }

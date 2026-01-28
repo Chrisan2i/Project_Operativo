@@ -3,6 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.unimet.interfaz;
+import com.unimet.clases.PCB;
+import com.unimet.estructuras.Cola;
+
 
 /**
  *
@@ -11,10 +14,15 @@ package com.unimet.interfaz;
 public class Simulacion extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Simulacion.class.getName());
-
-    /**
-     * Creates new form Simulacion
-     */
+// Tus colas
+    Cola<PCB> colaListos = new Cola<>();
+    Cola<PCB> colaBloqueados = new Cola<>();
+    
+    // AGREGA ESTO: La CPU (variable para saber quién está ejecutando)
+    PCB procesoEnCpu = null;
+    
+    // AGREGA ESTO: Bandera para detener la simulación si quieres
+    boolean corriendo = false;
     public Simulacion() {
         initComponents();
     }
@@ -28,21 +36,204 @@ public class Simulacion extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtColaListos = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txtColaBloqueados = new javax.swing.JTextArea();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        lblId = new javax.swing.JLabel();
+        lblEstado = new javax.swing.JLabel();
+        btnCrear = new javax.swing.JButton();
+        btnIniciar = new javax.swing.JButton();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setText("COLA DE LISTOS");
+
+        txtColaListos.setColumns(20);
+        txtColaListos.setRows(5);
+        jScrollPane1.setViewportView(txtColaListos);
+
+        jLabel2.setText("COLA DE BLOQUEADOS");
+
+        txtColaBloqueados.setColumns(20);
+        txtColaBloqueados.setRows(5);
+        jScrollPane2.setViewportView(txtColaBloqueados);
+
+        jLabel3.setText("CPU - PROCESANDO");
+
+        lblId.setText("ID: ---");
+
+        lblEstado.setText("Estado: ---");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(75, 75, 75)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblEstado)
+                    .addComponent(lblId)
+                    .addComponent(jLabel3))
+                .addContainerGap(86, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblId)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblEstado)
+                .addContainerGap(38, Short.MAX_VALUE))
+        );
+
+        btnCrear.setText("Crear Proceso");
+        btnCrear.addActionListener(this::btnCrearActionPerformed);
+
+        btnIniciar.setText("Iniciar Simulación");
+        btnIniciar.addActionListener(this::btnIniciarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(90, 90, 90)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(63, 63, 63))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(266, 266, 266)
+                        .addComponent(btnCrear)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnIniciar))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap(243, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(241, 241, 241))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(38, 38, 38)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel1))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(31, 31, 31)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnCrear)
+                    .addComponent(btnIniciar))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnCrearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCrearActionPerformed
+        // 1. Crear datos aleatorios para el proceso (Simulando carga de trabajo)
+    int instrucciones = (int) (Math.random() * 100) + 10;
+    int prioridad = (int) (Math.random() * 3) + 1; // Prioridad 1, 2 o 3
+    int deadline = (int) (Math.random() * 200) + 50; 
+    
+    // 2. Crear el objeto PCB (Tu proceso)
+    // El nombre será algo como "Proceso-1", "Proceso-2", etc.
+    String nombre = "Proceso-" + (int)(Math.random() * 1000);
+    PCB nuevoProceso = new PCB(nombre, prioridad, instrucciones, deadline);
+    
+    // 3. Guardarlo en tu estructura de datos (Backend)
+    colaListos.encolar(nuevoProceso);
+    
+    // 4. Mostrarlo en la interfaz gráfica (Frontend)
+    // Usamos append para que se agregue al final sin borrar lo anterior
+    txtColaListos.append(nuevoProceso.toString() + "\n");
+    
+    System.out.println("Proceso creado exitosamente: " + nombre);
+    }//GEN-LAST:event_btnCrearActionPerformed
+
+    private void btnIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarActionPerformed
+        // Evitar que le den click dos veces y creen dos hilos paralelos
+    if (corriendo) {
+        return; 
+    }
+    corriendo = true;
+    
+    // HILO DEL PLANIFICADOR (SCHEDULER)
+    Thread hiloSimulacion = new Thread(() -> {
+        while (corriendo) {
+            try {
+                // 1. Verificar si la CPU está libre
+                if (procesoEnCpu == null) {
+                    // Si no hay nadie en CPU, buscamos en la cola de Listos
+                    if (!colaListos.isEmpty()) {
+                        // Sacamos el primero de la cola (FCFS por ahora)
+                        procesoEnCpu = colaListos.desencolar();
+                        procesoEnCpu.setEstado("Ejecucion");
+                        
+                        // Actualizar la GUI (Visualmente)
+                        lblId.setText("ID: " + procesoEnCpu.getId());
+                        lblEstado.setText("Estado: Ejecutando");
+                        
+                        // Borrar el texto viejo de la cola y repintar (Simple refresh)
+                        refrescarColaListos(); 
+                    }
+                } 
+                else {
+                    // 2. Si hay un proceso en CPU, trabaja
+                    procesoEnCpu.avanzarInstruccion();
+                    
+                    // --- CAMBIO AQUÍ: Actualizamos la etiqueta para ver el progreso ---
+                    lblEstado.setText("Ejecutando: " + 
+                            procesoEnCpu.getInstruccionesEjecutadas() + " / " + 
+                            procesoEnCpu.getInstruccionesTotales());
+                    // -------------------------------------------------------------
+                    
+                    // Verificamos si terminó
+                    if (procesoEnCpu.getInstruccionesEjecutadas() >= procesoEnCpu.getInstruccionesTotales()) {
+                        System.out.println("Proceso terminado: " + procesoEnCpu.getNombre());
+                        
+                        procesoEnCpu.setEstado("Terminado");
+                        procesoEnCpu = null; // CPU Libre
+                        
+                        lblId.setText("ID: ---");
+                        lblEstado.setText("Esperando...");
+                        
+                        // Refrescar lista por si acaso
+                        refrescarColaListos();
+                    }
+                }
+                
+                // 3. Pausa para que podamos ver la animación (1 segundo por ciclo)
+                Thread.sleep(200); 
+                
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    });
+    
+    hiloSimulacion.start(); // ¡Arranca el motor!
+    }//GEN-LAST:event_btnIniciarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -68,7 +259,40 @@ public class Simulacion extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new Simulacion().setVisible(true));
     }
+    // --- PEGA ESTO AQUÍ ---
+    
+    // Este método actualiza el cuadro de texto con los procesos que quedan
+    private void refrescarColaListos() {
+        // 1. Borramos lo que hay escrito en la caja de texto
+        txtColaListos.setText(""); 
+        
+        // 2. Pedimos a la cola que nos de su contenido actualizado
+        if (!colaListos.isEmpty()) {
+            txtColaListos.setText(colaListos.toString());
+        }
+        
+        // 3. Hacemos lo mismo para la cola de bloqueados (por si acaso)
+        txtColaBloqueados.setText("");
+        if (!colaBloqueados.isEmpty()) {
+            txtColaBloqueados.setText(colaBloqueados.toString());
+        }
+    }
+    
+    // --- FIN DE LO QUE TIENES QUE PEGAR ---
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCrear;
+    private javax.swing.JButton btnIniciar;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JLabel lblEstado;
+    private javax.swing.JLabel lblId;
+    private javax.swing.JTextArea txtColaBloqueados;
+    private javax.swing.JTextArea txtColaListos;
     // End of variables declaration//GEN-END:variables
 }
