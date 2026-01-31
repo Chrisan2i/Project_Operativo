@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package com.unimet.interfaz;
 import com.unimet.clases.PCB;
 import com.unimet.estructuras.Cola;
@@ -23,6 +20,8 @@ public class Simulacion extends javax.swing.JFrame {
     
     // AGREGA ESTO: Bandera para detener la simulación si quieres
     boolean corriendo = false;
+    int quantum = 5; // Cada proceso tiene solo 5 turnos seguidos
+    int contadorQuantum = 0; // Para contar cuánto lleva el proceso actual
     public Simulacion() {
         initComponents();
     }
@@ -172,78 +171,101 @@ public class Simulacion extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCrearActionPerformed
 
     private void btnIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarActionPerformed
-        // Evitar que le den click dos veces y creen dos hilos paralelos
-    if (corriendo) {
-        return; 
-    }
-    corriendo = true;
-    
-    // HILO DEL PLANIFICADOR (SCHEDULER)
-    Thread hiloSimulacion = new Thread(() -> {
-        while (corriendo) {
-            try {
-                // 1. Verificar si la CPU está libre
-                if (procesoEnCpu == null) {
-                    // Si no hay nadie en CPU, buscamos en la cola de Listos
-                    if (!colaListos.isEmpty()) {
-                        // Sacamos el primero de la cola (FCFS por ahora)
-                        procesoEnCpu = colaListos.desencolar();
-                        procesoEnCpu.setEstado("Ejecucion");
+    // Evitar que le den click dos veces
+    if (corriendo) return;
+        corriendo = true;
+        
+        // HILO DEL PLANIFICADOR
+        Thread hiloSimulacion = new Thread(() -> {
+            while (corriendo) {
+                try {
+                    // A. MANEJO DE BLOQUEADOS (I/O)
+                    if (!colaBloqueados.isEmpty()) {
+                        PCB bloqueado = colaBloqueados.desencolar();
+                        bloqueado.setLongitudBloqueo(bloqueado.getLongitudBloqueo() - 1);
                         
-                        // Actualizar la GUI (Visualmente)
-                        lblId.setText("ID: " + procesoEnCpu.getId());
-                        lblEstado.setText("Estado: Ejecutando");
-                        
-                        // Borrar el texto viejo de la cola y repintar (Simple refresh)
-                        refrescarColaListos(); 
+                        if (bloqueado.getLongitudBloqueo() <= 0) {
+                            bloqueado.setEstado("Listo");
+                            bloqueado.setCicloParaBloqueo(-1); 
+                            colaListos.encolar(bloqueado);
+                            System.out.println(">>> Desbloqueado: " + bloqueado.getNombre());
+                        } else {
+                            colaBloqueados.encolar(bloqueado);
+                        }
                     }
-                } 
-                else {
-                    // 2. Si hay un proceso en CPU, trabaja
-                    procesoEnCpu.avanzarInstruccion();
-                    
-                    // --- CAMBIO AQUÍ: Actualizamos la etiqueta para ver el progreso ---
-                    lblEstado.setText("Ejecutando: " + 
-                            procesoEnCpu.getInstruccionesEjecutadas() + " / " + 
-                            procesoEnCpu.getInstruccionesTotales());
-                    // -------------------------------------------------------------
-                    
-                    // Verificamos si terminó
-                    if (procesoEnCpu.getInstruccionesEjecutadas() >= procesoEnCpu.getInstruccionesTotales()) {
-                        System.out.println("Proceso terminado: " + procesoEnCpu.getNombre());
-                        
-                        procesoEnCpu.setEstado("Terminado");
-                        procesoEnCpu = null; // CPU Libre
-                        
-                        lblId.setText("ID: ---");
-                        lblEstado.setText("Esperando...");
-                        
-                        // Refrescar lista por si acaso
-                        refrescarColaListos();
+
+                    // B. PLANIFICADOR CPU (Round Robin)
+                    if (procesoEnCpu == null) {
+                        if (!colaListos.isEmpty()) {
+                            procesoEnCpu = colaListos.desencolar();
+                            procesoEnCpu.setEstado("Ejecucion");
+                            contadorQuantum = 0;
+                            
+                            lblId.setText("ID: " + procesoEnCpu.getId());
+                            lblEstado.setText("Ejecutando (RR)");
+                            refrescarColaListos(); 
+                        }
+                    } 
+                    else {
+                        // 1. CHEQUEO DE E/S
+                        if (procesoEnCpu.getInstruccionesEjecutadas() == procesoEnCpu.getCicloParaBloqueo()) {
+                             System.out.println("!!! Bloqueado por E/S: " + procesoEnCpu.getNombre());
+                             procesoEnCpu.setEstado("Bloqueado");
+                             colaBloqueados.encolar(procesoEnCpu);
+                             procesoEnCpu = null;
+                             contadorQuantum = 0;
+                             lblId.setText("ID: --- (Bloqueado)");
+                             refrescarColaListos();
+                        }
+                        else {
+                            // 2. EJECUTAR
+                            procesoEnCpu.avanzarInstruccion();
+                            contadorQuantum++;
+                            
+                            lblEstado.setText("Ejecutando: " + 
+                                    procesoEnCpu.getInstruccionesEjecutadas() + " / " + 
+                                    procesoEnCpu.getInstruccionesTotales());
+
+                            // 3. CHEQUEO TERMINADO
+                            if (procesoEnCpu.getInstruccionesEjecutadas() >= procesoEnCpu.getInstruccionesTotales()) {
+                                System.out.println("Terminó: " + procesoEnCpu.getNombre());
+                                procesoEnCpu.setEstado("Terminado");
+                                procesoEnCpu = null;
+                                contadorQuantum = 0;
+                                lblId.setText("ID: ---");
+                                refrescarColaListos();
+                            }
+                            // 4. CHEQUEO QUANTUM
+                            else if (contadorQuantum >= quantum) {
+                                System.out.println("Cambio de Contexto (Quantum): Sale " + procesoEnCpu.getNombre());
+                                procesoEnCpu.setEstado("Listo");
+                                colaListos.encolar(procesoEnCpu);
+                                procesoEnCpu = null;
+                                contadorQuantum = 0;
+                                lblId.setText("ID: --- (Timeout)");
+                                refrescarColaListos();
+                            }
+                        }
                     }
+                    
+                    // Actualizar GUI Bloqueados
+                    if(colaBloqueados.isEmpty()) txtColaBloqueados.setText("");
+                    else txtColaBloqueados.setText(colaBloqueados.toString());
+
+                    Thread.sleep(200); 
+                    
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-                
-                // 3. Pausa para que podamos ver la animación (1 segundo por ciclo)
-                Thread.sleep(200); 
-                
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }
-    });
-    
-    hiloSimulacion.start(); // ¡Arranca el motor!
+        });
+        hiloSimulacion.start();
     }//GEN-LAST:event_btnIniciarActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -251,15 +273,12 @@ public class Simulacion extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (Exception ex) {
             logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
-        /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new Simulacion().setVisible(true));
     }
-    // --- PEGA ESTO AQUÍ ---
     
     // Este método actualiza el cuadro de texto con los procesos que quedan
     private void refrescarColaListos() {

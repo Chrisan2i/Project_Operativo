@@ -13,6 +13,8 @@ public class PCB {
     private int instruccionesTotales; // Duración total
     private int instruccionesEjecutadas; // Progreso
     private int deadline; // Tiempo límite (ciclo reloj absoluto)
+    private int cicloParaBloqueo; // En qué instrucción ocurre el evento (ej: ciclo 10)
+    private int longitudBloqueo;  // Cuánto tiempo debe esperar (ej: 5 ciclos)
     
     // Constructor
     public PCB(String nombre, int prioridad, int instrucciones, int deadline) {
@@ -27,6 +29,14 @@ public class PCB {
         this.programCounter = 0;
         this.mar = 0;
         this.instruccionesEjecutadas = 0;
+        // Si el proceso es largo, le damos probabilidad de bloquearse
+    if (instrucciones > 20) {
+        this.cicloParaBloqueo = (int) (Math.random() * (instrucciones - 10)) + 5;
+        this.longitudBloqueo = (int) (Math.random() * 5) + 3; // Espera entre 3 y 7 ciclos
+    } else {
+        this.cicloParaBloqueo = -1; // No se bloquea
+        this.longitudBloqueo = 0;
+}
     }
     
     // --- Getters y Setters ---
@@ -59,4 +69,9 @@ public class PCB {
     public String toString() {
         return nombre + " (ID:" + id + ") - " + estado;
     }
+
+    public int getCicloParaBloqueo() { return cicloParaBloqueo; }
+    public void setCicloParaBloqueo(int c) { this.cicloParaBloqueo = c; }
+    public int getLongitudBloqueo() { return longitudBloqueo; }
+    public void setLongitudBloqueo(int l) { this.longitudBloqueo = l; }
 }
