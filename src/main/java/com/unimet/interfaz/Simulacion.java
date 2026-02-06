@@ -24,6 +24,9 @@ public class Simulacion extends javax.swing.JFrame {
     int contadorQuantum = 0; // Para contar cuánto lleva el proceso actual
     public Simulacion() {
         initComponents();
+        // Configuración inicial por defecto
+        spnQuantum.setValue(5);      // Quantum de 5 turnos
+        spnVelocidad.setValue(1000); // 1 segundo de velocidad (para empezar lento)
     }
 
     /**
@@ -47,6 +50,10 @@ public class Simulacion extends javax.swing.JFrame {
         lblEstado = new javax.swing.JLabel();
         btnCrear = new javax.swing.JButton();
         btnIniciar = new javax.swing.JButton();
+        jLabel4 = new javax.swing.JLabel();
+        spnQuantum = new javax.swing.JSpinner();
+        jLabel5 = new javax.swing.JLabel();
+        spnVelocidad = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -98,6 +105,10 @@ public class Simulacion extends javax.swing.JFrame {
         btnIniciar.setText("Iniciar Simulación");
         btnIniciar.addActionListener(this::btnIniciarActionPerformed);
 
+        jLabel4.setText("Quantum:");
+
+        jLabel5.setText("Velocidad (ms):");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -122,24 +133,42 @@ public class Simulacion extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnIniciar))
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(243, Short.MAX_VALUE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(241, 241, 241))
+                .addGap(101, 101, 101)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4)
+                    .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5)
+                    .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(103, 103, 103))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(38, 38, 38)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1))
-                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(31, 31, 31)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(31, 31, 31)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(1, 1, 1)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCrear)
                     .addComponent(btnIniciar))
@@ -179,6 +208,10 @@ public class Simulacion extends javax.swing.JFrame {
         Thread hiloSimulacion = new Thread(() -> {
             while (corriendo) {
                 try {
+                    
+                    // LEER EL QUANTUM EN VIVO DESDE LA VENTANA
+                    int quantumActual = (Integer) spnQuantum.getValue();
+                    if (quantumActual < 1) quantumActual = 1; // Mínimo 1 para no romper
                     // A. MANEJO DE BLOQUEADOS (I/O)
                     if (!colaBloqueados.isEmpty()) {
                         PCB bloqueado = colaBloqueados.desencolar();
@@ -236,7 +269,7 @@ public class Simulacion extends javax.swing.JFrame {
                                 refrescarColaListos();
                             }
                             // 4. CHEQUEO QUANTUM
-                            else if (contadorQuantum >= quantum) {
+                            else if (contadorQuantum >= quantumActual) {
                                 System.out.println("Cambio de Contexto (Quantum): Sale " + procesoEnCpu.getNombre());
                                 procesoEnCpu.setEstado("Listo");
                                 colaListos.encolar(procesoEnCpu);
@@ -252,7 +285,10 @@ public class Simulacion extends javax.swing.JFrame {
                     if(colaBloqueados.isEmpty()) txtColaBloqueados.setText("");
                     else txtColaBloqueados.setText(colaBloqueados.toString());
 
-                    Thread.sleep(200); 
+                    int velocidad = (Integer) spnVelocidad.getValue();
+                    // Protección para que no sea negativo ni cero
+                    if (velocidad < 0) velocidad = 0; 
+                    Thread.sleep(velocidad);
                     
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -306,11 +342,15 @@ public class Simulacion extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblEstado;
     private javax.swing.JLabel lblId;
+    private javax.swing.JSpinner spnQuantum;
+    private javax.swing.JSpinner spnVelocidad;
     private javax.swing.JTextArea txtColaBloqueados;
     private javax.swing.JTextArea txtColaListos;
     // End of variables declaration//GEN-END:variables
