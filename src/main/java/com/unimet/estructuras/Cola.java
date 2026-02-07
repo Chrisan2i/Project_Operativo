@@ -1,9 +1,15 @@
 package com.unimet.estructuras;
+import com.unimet.clases.PCB;
+
 
 public class Cola<T> {
     private Nodo<T> pFirst; // Cabeza de la cola
     private Nodo<T> pLast;  // Final de la cola
     private int size;       // Tamaño
+    public static final int CRITERIO_PRIORIDAD = 0; // Menor número = Mayor prioridad
+    public static final int CRITERIO_SRT = 1;       // Shortest Remaining Time
+    public static final int CRITERIO_EDF = 2;       // Earliest Deadline First
+
 
     public Cola() {
         this.pFirst = null;
@@ -22,6 +28,70 @@ public class Cola<T> {
             pLast = nuevo;
         }
         size++;
+    }
+    
+
+    public void insertarOrdenado(T objeto, int criterio) {
+        Nodo<T> nuevo = new Nodo<>(objeto);
+        PCB pNuevo = (PCB) objeto; // Casteamos para leer datos del proceso
+
+        // 1. Si está vacía, insertamos normal
+        if (isEmpty()) {
+            pFirst = nuevo;
+            pLast = nuevo;
+            size++;
+            return;
+        }
+
+        // 2. Revisar si va ANTES del primero (Cabeza)
+        PCB pCabeza = (PCB) pFirst.getContenido();
+        if (esMejor(pNuevo, pCabeza, criterio)) {
+            nuevo.setSiguiente(pFirst);
+            pFirst = nuevo;
+            size++;
+            return;
+        }
+
+        // 3. Buscar posición en el medio o final
+        Nodo<T> actual = pFirst;
+        while (actual.getSiguiente() != null) {
+            PCB pSiguiente = (PCB) actual.getSiguiente().getContenido();
+            
+            // Si el nuevo es "mejor" que el siguiente, lo metemos aquí
+            if (esMejor(pNuevo, pSiguiente, criterio)) {
+                break;
+            }
+            actual = actual.getSiguiente();
+        }
+
+        // Insertar nodo
+        nuevo.setSiguiente(actual.getSiguiente());
+        actual.setSiguiente(nuevo);
+
+        // Si insertamos al final, actualizar pLast
+        if (nuevo.getSiguiente() == null) {
+            pLast = nuevo;
+        }
+        size++;
+    }
+
+    // Método auxiliar para comparar
+    private boolean esMejor(PCB nuevo, PCB existente, int criterio) {
+        switch (criterio) {
+            case CRITERIO_PRIORIDAD:
+                // Asumimos: 1 es más importante que 3
+                return nuevo.getPrioridad() < existente.getPrioridad();
+            case CRITERIO_SRT:
+                // Menor tiempo restante gana
+                int restanteNuevo = nuevo.getInstruccionesTotales() - nuevo.getInstruccionesEjecutadas();
+                int restanteExistente = existente.getInstruccionesTotales() - existente.getInstruccionesEjecutadas();
+                return restanteNuevo < restanteExistente;
+            case CRITERIO_EDF:
+                // Menor deadline (plazo más cercano) gana
+                return nuevo.getDeadline() < existente.getDeadline();
+            default:
+                return false;
+        }
     }
 
     // Método para sacar del inicio (Desencolar)
