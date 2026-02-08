@@ -15,6 +15,12 @@ public class Simulacion extends javax.swing.JFrame {
     Cola<PCB> colaListos = new Cola<>();
     Cola<PCB> colaBloqueados = new Cola<>();
     
+    public static final int MAX_MEMORIA = 5; 
+    
+    // Colas para los procesos que NO caben en RAM (están en disco)
+    Cola<PCB> colaListosSuspendidos = new Cola<>();
+    Cola<PCB> colaBloqueadosSuspendidos = new Cola<>();
+    
     PCB procesoEnCpu = null;
     boolean corriendo = false;
     int quantum = 5; // Cada proceso tiene solo 5 turnos seguidos
@@ -46,14 +52,20 @@ public class Simulacion extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         lblId = new javax.swing.JLabel();
         lblEstado = new javax.swing.JLabel();
-        btnCrear = new javax.swing.JButton();
         btnIniciar = new javax.swing.JButton();
+        btnCrear = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         spnQuantum = new javax.swing.JSpinner();
         jLabel5 = new javax.swing.JLabel();
         spnVelocidad = new javax.swing.JSpinner();
         lblReloj = new javax.swing.JLabel();
         cmbAlgoritmos = new javax.swing.JComboBox<>();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        txtBloqueadosSuspendidos = new javax.swing.JTextArea();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        txtListosSuspendidos = new javax.swing.JTextArea();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -75,6 +87,12 @@ public class Simulacion extends javax.swing.JFrame {
 
         lblEstado.setText("Estado: ---");
 
+        btnIniciar.setText("Iniciar Simulación");
+        btnIniciar.addActionListener(this::btnIniciarActionPerformed);
+
+        btnCrear.setText("Crear Proceso");
+        btnCrear.addActionListener(this::btnCrearActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -86,6 +104,11 @@ public class Simulacion extends javax.swing.JFrame {
                     .addComponent(lblId)
                     .addComponent(jLabel3))
                 .addContainerGap(86, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(btnCrear)
+                .addGap(18, 18, 18)
+                .addComponent(btnIniciar))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -96,14 +119,12 @@ public class Simulacion extends javax.swing.JFrame {
                 .addComponent(lblId)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblEstado)
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnIniciar)
+                    .addComponent(btnCrear))
+                .addContainerGap())
         );
-
-        btnCrear.setText("Crear Proceso");
-        btnCrear.addActionListener(this::btnCrearActionPerformed);
-
-        btnIniciar.setText("Iniciar Simulación");
-        btnIniciar.addActionListener(this::btnIniciarActionPerformed);
 
         jLabel4.setText("Quantum:");
 
@@ -114,83 +135,116 @@ public class Simulacion extends javax.swing.JFrame {
         cmbAlgoritmos.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FCFS", "RR", "Prioridad", "SRT", "EDF" }));
         cmbAlgoritmos.addActionListener(this::cmbAlgoritmosActionPerformed);
 
+        txtBloqueadosSuspendidos.setColumns(20);
+        txtBloqueadosSuspendidos.setRows(5);
+        jScrollPane3.setViewportView(txtBloqueadosSuspendidos);
+
+        txtListosSuspendidos.setColumns(20);
+        txtListosSuspendidos.setRows(5);
+        jScrollPane4.setViewportView(txtListosSuspendidos);
+
+        jLabel6.setText("Disco: Listos-Suspendidos");
+
+        jLabel7.setText("Disco: Bloqueados-Suspendidos");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(90, 90, 90)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel2)
-                .addGap(63, 63, 63))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnCrear)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnIniciar)
-                        .addGap(10, 10, 10))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(82, 82, 82)
-                        .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 97, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(101, 101, 101)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(15, 15, 15)
+                                    .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(86, 86, 86)
+                                    .addComponent(jLabel1))
+                                .addGroup(layout.createSequentialGroup()
+                                    .addGap(24, 24, 24)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addGap(57, 57, 57))
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(86, 86, 86)))))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5)
-                    .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(103, 103, 103))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(36, 36, 36)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(70, 70, 70)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addGap(62, 62, 62))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(87, 87, 87))))))
             .addGroup(layout.createSequentialGroup()
-                .addGap(320, 320, 320)
-                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(88, 88, 88)
+                .addComponent(jLabel2)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(jLabel7)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(jLabel4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(20, 20, 20)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel5)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(38, 38, 38)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(31, 31, 31)
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(49, 49, 49)
-                                .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnCrear)
-                            .addComponent(btnIniciar))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                        .addGap(20, 20, 20)
+                        .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         pack();
@@ -207,7 +261,21 @@ public class Simulacion extends javax.swing.JFrame {
     String nombre = "Proceso-" + (int)(Math.random() * 1000);
     PCB nuevoProceso = new PCB(nombre, prioridad, instrucciones, deadline);
     
-    agregarAColaListos(nuevoProceso);
+    // VERIFICAR MEMORIA ANTES DE ENTRAR
+    if (getOcupacionMemoria() < MAX_MEMORIA) {
+        // Hay espacio en RAM, entra normal
+        nuevoProceso.setEstado("Listo");
+        agregarAColaListos(nuevoProceso);
+    } else {
+        // ¡Memoria llena! Se va directo al DISCO (Suspendido)
+        nuevoProceso.setEstado("Listo-Suspendido");
+        colaListosSuspendidos.encolar(nuevoProceso);
+        System.out.println("Memoria llena. Proceso " + nuevoProceso.getId() + " enviado a Suspendidos.");
+    }
+    
+    revisarSuspendidos();
+    // Actualizar todas las colas visuales
+    refrescarColaListos();
     
     System.out.println("Proceso creado exitosamente: " + nombre);
     }//GEN-LAST:event_btnCrearActionPerformed
@@ -280,10 +348,11 @@ public class Simulacion extends javax.swing.JFrame {
                                 procesoEnCpu = null;
                                 contadorQuantum = 0;
                                 lblId.setText("ID: ---");
+                                revisarSuspendidos();
                                 refrescarColaListos();
                             }
                             // 4. CHEQUEO QUANTUM
-                            else if (contadorQuantum >= quantumActual) {
+                            else if (cmbAlgoritmos.getSelectedItem().equals("RR") && contadorQuantum >= quantumActual) {
                                 System.out.println("Cambio de Contexto (Quantum): Sale " + procesoEnCpu.getNombre());
                                 procesoEnCpu.setEstado("Listo");
                                 agregarAColaListos(procesoEnCpu);
@@ -338,51 +407,103 @@ public class Simulacion extends javax.swing.JFrame {
     
     // Este método actualiza el cuadro de texto con los procesos que quedan
     private void refrescarColaListos() {
-        // 1. Borramos lo que hay escrito en la caja de texto
+        // 1. Limpiar y llenar Listos (RAM)
         txtColaListos.setText(""); 
+        if (!colaListos.isEmpty()) txtColaListos.setText(colaListos.toString());
         
-        // 2. Pedimos a la cola que nos de su contenido actualizado
-        if (!colaListos.isEmpty()) {
-            txtColaListos.setText(colaListos.toString());
-        }
-        
-        // 3. Hacemos lo mismo para la cola de bloqueados (por si acaso)
+        // 2. Limpiar y llenar Bloqueados (RAM)
         txtColaBloqueados.setText("");
-        if (!colaBloqueados.isEmpty()) {
-            txtColaBloqueados.setText(colaBloqueados.toString());
-        }
+        if (!colaBloqueados.isEmpty()) txtColaBloqueados.setText(colaBloqueados.toString());
+        
+        // 3. Limpiar y llenar Suspendidos (Disco) <-- ESTO ES LO NUEVO
+        txtListosSuspendidos.setText("");
+        if (!colaListosSuspendidos.isEmpty()) txtListosSuspendidos.setText(colaListosSuspendidos.toString());
+        
+        txtBloqueadosSuspendidos.setText("");
+        if (!colaBloqueadosSuspendidos.isEmpty()) txtBloqueadosSuspendidos.setText(colaBloqueadosSuspendidos.toString());
     }
     
     public void agregarAColaListos(PCB proceso) {
-        // 1. Preguntamos qué algoritmo está seleccionado en la cajita
         String algoritmo = (String) cmbAlgoritmos.getSelectedItem();
-        
-        // 2. Dependiendo del algoritmo, insertamos de forma distinta
+
+        // 1. Insertar en la cola según algoritmo
         switch (algoritmo) {
             case "FCFS":
             case "RR":
-                // Para estos, es por orden de llegada (al final)
                 colaListos.encolar(proceso); 
                 break;
-                
             case "Prioridad":
-                // Insertamos ordenado por Prioridad (asumiendo que 0 es el código para prioridad en tu Cola)
-                colaListos.insertarOrdenado(proceso, 0);
+                colaListos.insertarOrdenado(proceso, 0); // 0 = Criterio Prioridad
                 break;
-                
             case "SRT":
-                // Insertamos ordenado por Tiempo Restante (código 1)
-                colaListos.insertarOrdenado(proceso, 1);
+                colaListos.insertarOrdenado(proceso, 1); // 1 = Criterio Tiempo Restante
                 break;
-                
             case "EDF":
-                // Insertamos ordenado por Deadline (código 2)
-                colaListos.insertarOrdenado(proceso, 2);
+                colaListos.insertarOrdenado(proceso, 2); // 2 = Criterio Deadline
                 break;
         }
-        
-        // 3. Actualizamos la visualización en la caja de texto
+
+    // 2. LOGICA DE EXPROPIACIÓN (PREEMPTION) - PARA EL 20 PUNTOS
+    // Si hay alguien en CPU y el algoritmo lo permite, verificamos si el nuevo es mejor
+        if (procesoEnCpu != null) {
+            boolean debeExpropiar = false;
+
+            // Solo expropiamos en algoritmos apropiativos
+            if (algoritmo.equals("Prioridad") && proceso.getPrioridad() < procesoEnCpu.getPrioridad()) {
+                debeExpropiar = true;
+            } else if (algoritmo.equals("SRT") && 
+                       (proceso.getInstruccionesTotales() - proceso.getInstruccionesEjecutadas()) < 
+                       (procesoEnCpu.getInstruccionesTotales() - procesoEnCpu.getInstruccionesEjecutadas())) {
+                debeExpropiar = true;
+            } else if (algoritmo.equals("EDF") && proceso.getDeadline() < procesoEnCpu.getDeadline()) {
+                debeExpropiar = true;
+            }
+
+            if (debeExpropiar) {
+                System.out.println("!!! EXPROPIACIÓN: " + proceso.getNombre() + " saca a " + procesoEnCpu.getNombre());
+
+                // Sacamos al actual del CPU
+                PCB saliente = procesoEnCpu;
+                saliente.setEstado("Listo");
+
+                // Lo devolvemos a la cola (llamada recursiva segura porque procesoEnCpu ya no será null al entrar)
+                // Ojo: Para evitar bucle infinito, lo metemos directo a la cola segun su tipo
+                switch (algoritmo) {
+                    case "Prioridad": colaListos.insertarOrdenado(saliente, 0); break;
+                    case "SRT":       colaListos.insertarOrdenado(saliente, 1); break;
+                    case "EDF":       colaListos.insertarOrdenado(saliente, 2); break;
+                }
+
+                procesoEnCpu = null; // Liberamos CPU para que el Hilo tome al nuevo (que quedó de primero)
+                contadorQuantum = 0;
+                lblId.setText("ID: --- (Expropiado)");
+            }
+        }
+
         refrescarColaListos();
+    }    
+    // Cuenta cuántos procesos ocupan espacio en RAM actualmente
+    private int getOcupacionMemoria() {
+        int ocupados = colaListos.getSize() + colaBloqueados.getSize();
+        if (procesoEnCpu != null) {
+            ocupados++;
+        }
+        return ocupados;
+    }
+    
+    private void revisarSuspendidos() {
+        // Mientras haya espacio en RAM y haya gente esperando en disco...
+        while (getOcupacionMemoria() < MAX_MEMORIA && !colaListosSuspendidos.isEmpty()) {
+            
+            // Sacamos al primero del disco
+            PCB rescatado = colaListosSuspendidos.desencolar();
+            
+            // Lo pasamos a RAM
+            rescatado.setEstado("Listo");
+            agregarAColaListos(rescatado); // Aquí se ordenará según prioridad/SRT/etc.
+            
+            System.out.println("Swap IN: Proceso " + rescatado.getId() + " subió a RAM.");
+        }
     }
     
     // --- FIN DE LO QUE TIENES QUE PEGAR ---
@@ -397,15 +518,21 @@ public class Simulacion extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel lblEstado;
     private javax.swing.JLabel lblId;
     private javax.swing.JLabel lblReloj;
     private javax.swing.JSpinner spnQuantum;
     private javax.swing.JSpinner spnVelocidad;
+    private javax.swing.JTextArea txtBloqueadosSuspendidos;
     private javax.swing.JTextArea txtColaBloqueados;
     private javax.swing.JTextArea txtColaListos;
+    private javax.swing.JTextArea txtListosSuspendidos;
     // End of variables declaration//GEN-END:variables
 }
