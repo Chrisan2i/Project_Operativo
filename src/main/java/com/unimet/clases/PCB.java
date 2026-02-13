@@ -67,8 +67,9 @@ public class PCB {
     
     @Override
     public String toString() {
-        return nombre + " (ID:" + id + ") - " + estado;
-    }
+    return String.format("[%d] %s | Est: %s | Prio: %d | Dead: %d | PC: %d", 
+            id, nombre, estado, prioridad, deadline, programCounter);
+}
 
     public int getCicloParaBloqueo() { return cicloParaBloqueo; }
     public void setCicloParaBloqueo(int c) { this.cicloParaBloqueo = c; }

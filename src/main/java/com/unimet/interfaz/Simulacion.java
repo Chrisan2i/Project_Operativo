@@ -1,5 +1,6 @@
 
 package com.unimet.interfaz;
+import com.unimet.clases.GestorGraficas;
 import com.unimet.clases.PCB;
 import com.unimet.estructuras.Cola;
 
@@ -9,6 +10,20 @@ import com.unimet.estructuras.Cola;
  * @author chris
  */
 public class Simulacion extends javax.swing.JFrame {
+    // --- INICIO DE PERSONALIZACIÓN VISUAL ---
+    
+    // Paleta de Colores "Cyberpunk / Espacial"
+    java.awt.Color colorFondo = java.awt.Color.decode("#0F172A");    // Azul oscuro profundo
+    java.awt.Color colorPanel = java.awt.Color.decode("#1E293B");    // Gris azulado
+    java.awt.Color colorBorde = java.awt.Color.decode("#38BDF8");    // Cian Neón
+    java.awt.Color colorTexto = java.awt.Color.decode("#E2E8F0");    // Blanco humo
+    java.awt.Color colorVerde = java.awt.Color.decode("#22C55E");    // Verde Terminal
+    java.awt.Color colorRojo  = java.awt.Color.decode("#EF4444");    // Rojo Alerta
+    
+    // Fuentes Personalizadas
+    java.awt.Font fuenteTerminal = new java.awt.Font("Monospaced", java.awt.Font.BOLD, 12);
+    java.awt.Font fuenteReloj    = new java.awt.Font("Impact", java.awt.Font.PLAIN, 24);
+    java.awt.Font fuenteTitulo   = new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14);
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Simulacion.class.getName());
 // Tus colas
@@ -20,16 +35,21 @@ public class Simulacion extends javax.swing.JFrame {
     // Colas para los procesos que NO caben en RAM (están en disco)
     Cola<PCB> colaListosSuspendidos = new Cola<>();
     Cola<PCB> colaBloqueadosSuspendidos = new Cola<>();
+    GestorGraficas misGraficas; 
     
     PCB procesoEnCpu = null;
     boolean corriendo = false;
     int quantum = 5; // Cada proceso tiene solo 5 turnos seguidos
     int contadorQuantum = 0; // Para contar cuánto lleva el proceso actual
     int relojGlobal = 0;
+    
     public Simulacion() {
+        
         initComponents();
+        aplicarTemaOscuro();
         spnQuantum.setValue(5);      // Quantum de 5 turnos
         spnVelocidad.setValue(1000); // 1 segundo de velocidad (para empezar lento)
+        misGraficas = new GestorGraficas();
         
     }
 
@@ -66,6 +86,10 @@ public class Simulacion extends javax.swing.JFrame {
         txtListosSuspendidos = new javax.swing.JTextArea();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
+        pbCpu = new javax.swing.JProgressBar();
+        btnCargar = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        lblMemoria = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -97,18 +121,19 @@ public class Simulacion extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(75, 75, 75)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblEstado)
-                    .addComponent(lblId)
-                    .addComponent(jLabel3))
-                .addContainerGap(86, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(btnCrear)
+                .addContainerGap(22, Short.MAX_VALUE)
+                .addComponent(btnCrear, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnIniciar))
+                .addComponent(btnIniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(76, 76, 76)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblId, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -116,14 +141,14 @@ public class Simulacion extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblId)
+                .addComponent(lblId, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(lblEstado, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblEstado)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnIniciar)
-                    .addComponent(btnCrear))
-                .addContainerGap())
+                    .addComponent(btnIniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCrear, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12))
         );
 
         jLabel4.setText("Quantum:");
@@ -147,104 +172,130 @@ public class Simulacion extends javax.swing.JFrame {
 
         jLabel7.setText("Disco: Bloqueados-Suspendidos");
 
+        btnCargar.setText("Cargar");
+        btnCargar.addActionListener(this::btnCargarActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(15, 15, 15)
-                                    .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(86, 86, 86)
-                                    .addComponent(jLabel1))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(24, 24, 24)
-                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addGap(57, 57, 57))
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 247, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(86, 86, 86)))))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(128, 128, 128)
+                        .addComponent(lblMemoria))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(121, 121, 121)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(254, 254, 254)
+                                .addComponent(jLabel6))
+                            .addComponent(jLabel8)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(48, 48, 48)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(24, 24, 24)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(118, 118, 118)
+                                .addComponent(jLabel2)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(31, 31, 31)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(129, 129, 129)
+                                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(54, 54, 54)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(70, 70, 70)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addGap(62, 62, 62))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel7))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(85, 85, 85)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel4)
-                                    .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(87, 87, 87))))))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(88, 88, 88)
-                .addComponent(jLabel2)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jLabel5)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(8, 8, 8)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jLabel4)
+                                                .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(pbCpu, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(btnCargar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(10, 10, 10))))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 268, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(35, 35, 35)
-                .addComponent(jLabel7)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(jLabel4)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23)
-                .addComponent(jLabel5)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(20, 20, 20)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(lblMemoria, javax.swing.GroupLayout.Alignment.TRAILING))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(29, 29, 29)
+                                .addComponent(lblReloj, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(139, 139, 139)
                         .addComponent(jLabel2)
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(29, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(25, 25, 25))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(68, 68, 68)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(cmbAlgoritmos, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(158, 158, 158)
+                                        .addComponent(jLabel4)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(spnQuantum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(jLabel5)
+                                        .addGap(2, 2, 2)
+                                        .addComponent(spnVelocidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(101, 101, 101)
+                                        .addComponent(btnCargar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jLabel7)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 26, Short.MAX_VALUE)
+                                .addComponent(pbCpu, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(32, 32, 32))
         );
 
         pack();
@@ -283,109 +334,250 @@ public class Simulacion extends javax.swing.JFrame {
     private void btnIniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarActionPerformed
     // Evitar que le den click dos veces
     if (corriendo) return;
-        corriendo = true;
-        
-        
-        // HILO DEL PLANIFICADOR
-        Thread hiloSimulacion = new Thread(() -> {
-            while (corriendo) {
-                try {
-                    
-                    // LEER EL QUANTUM EN VIVO DESDE LA VENTANA
-                    int quantumActual = (Integer) spnQuantum.getValue();
-                    if (quantumActual < 1) quantumActual = 1; // Mínimo 1 para no romper
-                    // A. MANEJO DE BLOQUEADOS (I/O)
-                    if (!colaBloqueados.isEmpty()) {
-                        PCB bloqueado = colaBloqueados.desencolar();
+    corriendo = true;
+
+    // HILO DEL PLANIFICADOR PRINCIPAL
+    Thread hiloSimulacion = new Thread(() -> {
+        while (corriendo) {
+            try {
+                // -----------------------------------------------------------
+                // 1. LECTURA DE PARÁMETROS DE LA INTERFAZ
+                // -----------------------------------------------------------
+                int quantumActual = (Integer) spnQuantum.getValue();
+                if (quantumActual < 1) quantumActual = 1;
+                
+                int velocidad = (Integer) spnVelocidad.getValue();
+                if (velocidad < 0) velocidad = 0;
+
+                // Avanzar el reloj del sistema
+                relojGlobal++;
+                // Usamos invokeLater para actualizar la GUI desde otro hilo (Recomendado)
+                javax.swing.SwingUtilities.invokeLater(() -> lblReloj.setText("Reloj Global: " + relojGlobal));
+
+                // -----------------------------------------------------------
+                // 2. GESTIÓN DE BLOQUEADOS (E/S) - RAM Y DISCO
+                // -----------------------------------------------------------
+                
+                // A. Bloqueados en RAM
+                int sizeBloq = colaBloqueados.getSize();
+                for(int i=0; i<sizeBloq; i++) {
+                    PCB bloqueado = colaBloqueados.desencolar();
+                    if(bloqueado != null) {
                         bloqueado.setLongitudBloqueo(bloqueado.getLongitudBloqueo() - 1);
-                        
+
                         if (bloqueado.getLongitudBloqueo() <= 0) {
+                            // Terminó E/S -> Va a Listo (RAM o Disco según espacio)
+                            System.out.println(">>> Fin I/O (RAM): " + bloqueado.getNombre());
                             bloqueado.setEstado("Listo");
-                            bloqueado.setCicloParaBloqueo(-1); 
-                            agregarAColaListos(bloqueado);
-                            System.out.println(">>> Desbloqueado: " + bloqueado.getNombre());
+                            bloqueado.setCicloParaBloqueo(-1);
+                            agregarAColaListos(bloqueado); 
                         } else {
                             colaBloqueados.encolar(bloqueado);
                         }
                     }
+                }
 
-                    // B. PLANIFICADOR CPU (Round Robin)
-                    if (procesoEnCpu == null) {
-                        if (!colaListos.isEmpty()) {
-                            procesoEnCpu = colaListos.desencolar();
-                            procesoEnCpu.setEstado("Ejecucion");
-                            contadorQuantum = 0;
-                            
-                            lblId.setText("ID: " + procesoEnCpu.getId());
-                            lblEstado.setText("Ejecutando (RR)");
-                            refrescarColaListos(); 
+                // B. Bloqueados en DISCO (Suspendidos)
+                int sizeBloqSusp = colaBloqueadosSuspendidos.getSize();
+                for(int i=0; i<sizeBloqSusp; i++) {
+                    PCB bSusp = colaBloqueadosSuspendidos.desencolar();
+                    if(bSusp != null) {
+                        bSusp.setLongitudBloqueo(bSusp.getLongitudBloqueo() - 1);
+
+                        if (bSusp.getLongitudBloqueo() <= 0) {
+                            // Terminó E/S en Disco -> Pasa a Listos-Suspendidos
+                            System.out.println(">>> Fin I/O (Disco): " + bSusp.getNombre());
+                            bSusp.setEstado("Listo-Suspendido");
+                            bSusp.setCicloParaBloqueo(-1);
+                            colaListosSuspendidos.encolar(bSusp);
+                        } else {
+                            colaBloqueadosSuspendidos.encolar(bSusp);
                         }
-                    } 
+                    }
+                }
+
+                // Intentar subir procesos de Disco a RAM si se liberó espacio arriba
+                revisarSuspendidos(); 
+
+                // -----------------------------------------------------------
+                // 3. PLANIFICADOR DE CPU (DISPATCHER)
+                // -----------------------------------------------------------
+                if (procesoEnCpu == null) {
+                    if (!colaListos.isEmpty()) {
+                        procesoEnCpu = colaListos.desencolar();
+                        procesoEnCpu.setEstado("Ejecucion");
+                        contadorQuantum = 0;
+                        
+                        // Actualizar GUI
+                        PCB pRef = procesoEnCpu; 
+                        javax.swing.SwingUtilities.invokeLater(() -> {
+                            lblId.setText("ID: " + pRef.getId());
+                            lblEstado.setText("Ejecutando (" + cmbAlgoritmos.getSelectedItem() + ")");
+                        });
+                    } else {
+                        javax.swing.SwingUtilities.invokeLater(() -> {
+                            lblId.setText("ID: --- (IDLE)");
+                            lblEstado.setText("Esperando procesos...");
+                            pbCpu.setValue(0);
+                        });
+                    }
+                }
+
+                // -----------------------------------------------------------
+                // 4. EJECUCIÓN DEL PROCESO
+                // -----------------------------------------------------------
+                if (procesoEnCpu != null) {
+                    
+                    // A. VERIFICAR DEADLINE (REQUERIMIENTO CRÍTICO)
+                    if (relojGlobal > procesoEnCpu.getDeadline()) {
+                        System.out.println(">>> FALLO DE DEADLINE: Proceso " + procesoEnCpu.getId());
+                        misGraficas.registrarFallo();
+                        procesoEnCpu.setEstado("Terminado (Fallo)");
+                        procesoEnCpu = null;
+                        
+                        javax.swing.SwingUtilities.invokeLater(() -> lblId.setText("ID: --- (Fallo Deadline)"));
+                        // Aquí podrías incrementar un contador de fallos
+                    }
                     else {
-                        // 1. CHEQUEO DE E/S
+                        // B. VERIFICAR SI TOCA BLOQUEO POR E/S
                         if (procesoEnCpu.getInstruccionesEjecutadas() == procesoEnCpu.getCicloParaBloqueo()) {
-                             System.out.println("!!! Bloqueado por E/S: " + procesoEnCpu.getNombre());
-                             procesoEnCpu.setEstado("Bloqueado");
-                             colaBloqueados.encolar(procesoEnCpu);
-                             procesoEnCpu = null;
-                             contadorQuantum = 0;
-                             lblId.setText("ID: --- (Bloqueado)");
-                             refrescarColaListos();
+                            System.out.println(">>> Bloqueo por E/S: Proceso " + procesoEnCpu.getId());
+                            procesoEnCpu.setEstado("Bloqueado");
+                            
+                            // Verificar si cabe en RAM o va a Disco
+                            if (getOcupacionMemoria() <= MAX_MEMORIA) {
+                                colaBloqueados.encolar(procesoEnCpu);
+                            } else {
+                                // Si la RAM está explotada, el bloqueado se va a disco
+                                procesoEnCpu.setEstado("Bloqueado-Suspendido");
+                                colaBloqueadosSuspendidos.encolar(procesoEnCpu);
+                            }
+                            
+                            procesoEnCpu = null;
+                            javax.swing.SwingUtilities.invokeLater(() -> lblId.setText("ID: --- (Bloqueado)"));
                         }
+                        // C. EJECUTAR INSTRUCCIÓN
                         else {
-                            // 2. EJECUTAR
                             procesoEnCpu.avanzarInstruccion();
                             contadorQuantum++;
-                            
-                            lblEstado.setText("Ejecutando: " + 
-                                    procesoEnCpu.getInstruccionesEjecutadas() + " / " + 
-                                    procesoEnCpu.getInstruccionesTotales());
 
-                            // 3. CHEQUEO TERMINADO
-                            if (procesoEnCpu.getInstruccionesEjecutadas() >= procesoEnCpu.getInstruccionesTotales()) {
-                                System.out.println("Terminó: " + procesoEnCpu.getNombre());
+                            // Actualizar Barra de Progreso
+                            int total = procesoEnCpu.getInstruccionesTotales();
+                            int actual = procesoEnCpu.getInstruccionesEjecutadas();
+                            int porcentaje = (actual * 100) / total;
+                            
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                pbCpu.setValue(porcentaje);
+                                pbCpu.setString(actual + " / " + total + " Instr");
+                                if(porcentaje > 80) pbCpu.setForeground(java.awt.Color.ORANGE);
+                                else pbCpu.setForeground(java.awt.Color.decode("#22C55E"));
+                            });
+
+                            // D. VERIFICAR FIN DE PROCESO
+                            if (actual >= total) {
+                                System.out.println(">>> Terminado: " + procesoEnCpu.getId());
+                                misGraficas.registrarExito();
                                 procesoEnCpu.setEstado("Terminado");
                                 procesoEnCpu = null;
-                                contadorQuantum = 0;
-                                lblId.setText("ID: ---");
-                                revisarSuspendidos();
-                                refrescarColaListos();
+                                javax.swing.SwingUtilities.invokeLater(() -> lblId.setText("ID: --- (Terminado)"));
+                                revisarSuspendidos(); // Ver si alguien sube
                             }
-                            // 4. CHEQUEO QUANTUM
+                            // E. VERIFICAR FIN DE QUANTUM (Solo RR)
                             else if (cmbAlgoritmos.getSelectedItem().equals("RR") && contadorQuantum >= quantumActual) {
-                                System.out.println("Cambio de Contexto (Quantum): Sale " + procesoEnCpu.getNombre());
+                                System.out.println(">>> Fin Quantum: " + procesoEnCpu.getId());
                                 procesoEnCpu.setEstado("Listo");
                                 agregarAColaListos(procesoEnCpu);
                                 procesoEnCpu = null;
                                 contadorQuantum = 0;
-                                lblId.setText("ID: --- (Timeout)");
-                                refrescarColaListos();
+                                javax.swing.SwingUtilities.invokeLater(() -> lblId.setText("ID: --- (Timeout)"));
                             }
                         }
                     }
-                    
-                    // Actualizar GUI Bloqueados
-                    if(colaBloqueados.isEmpty()) txtColaBloqueados.setText("");
-                    else txtColaBloqueados.setText(colaBloqueados.toString());
-
-                    int velocidad = (Integer) spnVelocidad.getValue();
-                    // Protección para que no sea negativo ni cero
-                    if (velocidad < 0) velocidad = 0; 
-                    relojGlobal++;
-                    lblReloj.setText("Reloj Global: " + relojGlobal); // Actualizar etiqueta visual
-                    Thread.sleep(velocidad);
-                    
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
+
+                // -----------------------------------------------------------
+                // 5. ACTUALIZACIÓN FINAL DE COLAS VISUALES
+                // -----------------------------------------------------------
+                javax.swing.SwingUtilities.invokeLater(() -> refrescarColaListos());
+                int ocupados = getOcupacionMemoria();
+                    lblMemoria.setText("Memoria RAM: " + ocupados + "/" + MAX_MEMORIA);
+                    
+                    // Truco visual: Si está llena (5/5), ponlo en ROJO, si no, en VERDE
+                    if (ocupados >= MAX_MEMORIA) {
+                        lblMemoria.setForeground(java.awt.Color.RED);
+                        lblMemoria.setText("Memoria RAM: ¡LLENA! (" + ocupados + "/" + MAX_MEMORIA + ")");
+                    } else {
+                        lblMemoria.setForeground(java.awt.Color.GREEN);
+                    }
+                
+                Thread.sleep(velocidad);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
-        hiloSimulacion.start();
+        }
+    });
+    hiloSimulacion.start();
+    Thread hiloInterrupciones = new Thread(() -> {
+        while (corriendo) {
+            try {
+                // 1. Esperar un tiempo aleatorio largo (ej. entre 10 y 20 segundos)
+                // Para que no sea molesto, que pase poco.
+                int tiempoEspera = (int)(Math.random() * 10000) + 10000; 
+                Thread.sleep(tiempoEspera);
+
+                // 2. Crear una Interrupción (Proceso de Prioridad 0 - MÁXIMA)
+                PCB interrupcion = new PCB("ALERTA: FALLO MOTOR", 0, 20, 100);
+                interrupcion.setEstado("Listo");
+
+                // 3. Meterlo a la fuerza en la cola de Listos (al principio si es prioridad)
+                colaListos.insertarOrdenado(interrupcion, Cola.CRITERIO_PRIORIDAD);
+
+                System.out.println("!!! INTERRUPCIÓN GENERADA: " + interrupcion.getNombre());
+
+                // 4. (Opcional) Si quieres ser muy estricto, podrías sacar al CPU aquí mismo
+                // Pero el planificador lo hará solo en la siguiente vuelta.
+
+            } catch (InterruptedException e) { e.printStackTrace(); }
+        }
+    });
+    hiloInterrupciones.start();
     }//GEN-LAST:event_btnIniciarActionPerformed
 
     private void cmbAlgoritmosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbAlgoritmosActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbAlgoritmosActionPerformed
+
+    private void btnCargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarActionPerformed
+    javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
+    int seleccion = fileChooser.showOpenDialog(this);
+    
+    if (seleccion == javax.swing.JFileChooser.APPROVE_OPTION) {
+        java.io.File archivo = fileChooser.getSelectedFile();
+        
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(archivo))) {
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                // Asumimos formato CSV: Nombre,Prioridad,Instrucciones,Deadline
+                // Ejemplo: ProcesoA,1,50,200
+                String[] datos = linea.split(",");
+                if (datos.length == 4) {
+                    String nombre = datos[0].trim();
+                    int prio = Integer.parseInt(datos[1].trim());
+                    int inst = Integer.parseInt(datos[2].trim());
+                    int dead = Integer.parseInt(datos[3].trim());
+                    
+                    PCB nuevo = new PCB(nombre, prio, inst, dead);
+                    agregarAColaListos(nuevo); // Reutilizamos tu lógica de agregar
+                }
+            }
+            System.out.println("Archivo cargado exitosamente.");
+            refrescarColaListos();
+        } catch (Exception e) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Error al leer archivo: " + e.getMessage());
+        }
+    }
+    }//GEN-LAST:event_btnCargarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -491,25 +683,128 @@ public class Simulacion extends javax.swing.JFrame {
         return ocupados;
     }
     
+    // ESTE MÉTODO MUEVE PROCESOS DEL DISCO A LA RAM
     private void revisarSuspendidos() {
-        // Mientras haya espacio en RAM y haya gente esperando en disco...
+        // Mientras haya espacio en RAM (menos de 5 procesos) Y haya gente esperando en disco
         while (getOcupacionMemoria() < MAX_MEMORIA && !colaListosSuspendidos.isEmpty()) {
-            
-            // Sacamos al primero del disco
+
+            // 1. Sacamos al primero de la lista de SUSPENDIDOS (Disco)
             PCB rescatado = colaListosSuspendidos.desencolar();
-            
-            // Lo pasamos a RAM
-            rescatado.setEstado("Listo");
-            agregarAColaListos(rescatado); // Aquí se ordenará según prioridad/SRT/etc.
-            
-            System.out.println("Swap IN: Proceso " + rescatado.getId() + " subió a RAM.");
+
+            if (rescatado != null) {
+                // 2. Lo pasamos a RAM
+                rescatado.setEstado("Listo");
+
+                // 3. Lo insertamos en la cola de listos de RAM según el algoritmo actual
+                // IMPORTANTE: Usamos insertarOrdenado para respetar prioridades o SRT
+                String algoritmo = (String) cmbAlgoritmos.getSelectedItem();
+
+                switch (algoritmo) {
+                    case "Prioridad": 
+                        // 0 = Criterio Prioridad (Menor número gana)
+                        colaListos.insertarOrdenado(rescatado, Cola.CRITERIO_PRIORIDAD); 
+                        break;
+                    case "SRT":       
+                        // 1 = Criterio Tiempo Restante (Menor tiempo gana)
+                        colaListos.insertarOrdenado(rescatado, Cola.CRITERIO_SRT); 
+                        break;
+                    case "EDF":       
+                        // 2 = Criterio Deadline (Plazo más cercano gana)
+                        colaListos.insertarOrdenado(rescatado, Cola.CRITERIO_EDF); 
+                        break;
+                    default:          
+                        // FCFS o RR (Al final de la cola)
+                        colaListos.encolar(rescatado); 
+                        break;
+                }
+
+                System.out.println(">>> SWAP IN: Proceso " + rescatado.getId() + " subió del Disco a la RAM.");
+            }
         }
+    }
+    
+    // MÉTODO MÁGICO PARA ESTILIZAR LA INTERFAZ
+    private void aplicarTemaOscuro() {
+        // 1. Fondo Principal
+        this.getContentPane().setBackground(colorFondo);
+        this.setTitle("UNIMET-Sat RTOS | Mission Control Center");
+        
+        // 2. Estilizar Colas (JTextAreas)
+        estilizarCola(txtColaListos, "RAM: Cola de Listos");
+        estilizarCola(txtColaBloqueados, "RAM: Bloqueados (I/O)");
+        estilizarCola(txtListosSuspendidos, "DISCO: Swap Listos");
+        estilizarCola(txtBloqueadosSuspendidos, "DISCO: Swap Bloqueados");
+        
+        // 3. Estilizar Panel CPU (Centro)
+        jPanel1.setBackground(colorPanel);
+        jPanel1.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+            javax.swing.BorderFactory.createLineBorder(colorBorde, 2),
+            javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // 4. Estilizar Etiquetas (Labels)
+        // Reloj Global estilo Digital
+        lblReloj.setFont(fuenteReloj);
+        lblReloj.setForeground(colorBorde);
+        lblReloj.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblReloj.setBorder(javax.swing.BorderFactory.createLineBorder(colorBorde));
+        
+        // Etiquetas generales
+        javax.swing.JLabel[] labels = {jLabel1, jLabel2, jLabel3, jLabel4, jLabel5, jLabel6, jLabel7, lblId, lblEstado};
+        for (javax.swing.JLabel lbl : labels) {
+            lbl.setForeground(colorTexto);
+            if (lbl == lblId || lbl == lblEstado) {
+                lbl.setFont(fuenteTerminal.deriveFont(14f));
+                lbl.setForeground(colorVerde);
+            }
+        }
+
+        // 5. Botones Estilo Plano
+        estilizarBoton(btnIniciar, colorVerde);
+        estilizarBoton(btnCrear, colorBorde);
+        
+        // 6. Controles (Spinner y Combo)
+        cmbAlgoritmos.setBackground(colorPanel);
+        cmbAlgoritmos.setForeground(java.awt.Color.WHITE); // Ojo: A veces Swing resiste cambios en ComboBox
+    }
+
+    // Auxiliar para JTextAreas
+    private void estilizarCola(javax.swing.JTextArea txt, String titulo) {
+        txt.setBackground(java.awt.Color.BLACK);
+        txt.setForeground(colorVerde);
+        txt.setFont(fuenteTerminal);
+        txt.setCaretColor(java.awt.Color.WHITE);
+        
+        // Borde con Título incorporado
+        javax.swing.border.TitledBorder bordeTitulo = javax.swing.BorderFactory.createTitledBorder(
+            javax.swing.BorderFactory.createLineBorder(java.awt.Color.GRAY),
+            titulo
+        );
+        bordeTitulo.setTitleColor(colorTexto);
+        bordeTitulo.setTitleFont(fuenteTitulo);
+        
+        // Aplicamos el borde al ScrollPane que contiene el TextArea (es el padre)
+        if (txt.getParent() != null && txt.getParent().getParent() instanceof javax.swing.JScrollPane) {
+            ((javax.swing.JScrollPane)txt.getParent().getParent()).setBorder(bordeTitulo);
+            ((javax.swing.JScrollPane)txt.getParent().getParent()).setBackground(colorPanel);
+        }
+    }
+
+    // Auxiliar para Botones
+    private void estilizarBoton(javax.swing.JButton btn, java.awt.Color color) {
+        btn.setBackground(color);
+        btn.setForeground(java.awt.Color.BLACK); // Texto oscuro para contraste
+        btn.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
+        btn.setFocusPainted(false);
+        btn.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        btn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
     }
     
     // --- FIN DE LO QUE TIENES QUE PEGAR ---
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCargar;
     private javax.swing.JButton btnCrear;
     private javax.swing.JButton btnIniciar;
     private javax.swing.JComboBox<String> cmbAlgoritmos;
@@ -520,6 +815,7 @@ public class Simulacion extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -527,7 +823,9 @@ public class Simulacion extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JLabel lblEstado;
     private javax.swing.JLabel lblId;
+    private javax.swing.JLabel lblMemoria;
     private javax.swing.JLabel lblReloj;
+    private javax.swing.JProgressBar pbCpu;
     private javax.swing.JSpinner spnQuantum;
     private javax.swing.JSpinner spnVelocidad;
     private javax.swing.JTextArea txtBloqueadosSuspendidos;
